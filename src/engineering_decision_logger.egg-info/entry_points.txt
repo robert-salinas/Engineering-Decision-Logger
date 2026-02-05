@@ -1,0 +1,2 @@
+[console_scripts]
+edl = src.cli:app

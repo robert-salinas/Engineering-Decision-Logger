@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: engineering-decision-logger
+Version: 0.1.0
+Summary: A CLI tool to log and manage engineering decisions using ADR format and Git integration.
+Author: Robert Esteban
+Requires-Python: >=3.10
+License-File: LICENSE
+Requires-Dist: typer[all]>=0.9.0
+Requires-Dist: sqlmodel>=0.0.14
+Requires-Dist: rich>=13.0.0
+Requires-Dist: gitpython>=3.1.0
+Requires-Dist: jinja2>=3.1.0
+Requires-Dist: python-slugify>=8.0.0
+Dynamic: license-file

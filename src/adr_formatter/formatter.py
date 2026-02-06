@@ -43,10 +43,12 @@ Chosen option: "{{ chosen_option }}", because {{ rationale }}
 {% endfor %}
 """
 
+
 class ADRFormatter:
     """
     Formats decision data into an Architecture Decision Record (ADR) Markdown file.
     """
+
     def __init__(self, template_str: str = ADR_TEMPLATE):
         """
         Initializes the ADRFormatter with a Jinja2 template.

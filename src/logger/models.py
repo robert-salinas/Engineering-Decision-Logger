@@ -4,10 +4,12 @@ from sqlmodel import Field, SQLModel, create_engine, Session, select
 from datetime import datetime
 import os
 
+
 class Decision(SQLModel, table=True):
     """
     Represents an Engineering Decision Record (ADR) in the database.
     """
+
     id: Optional[int] = Field(default=None, primary_key=True)
     title: str
     status: str = "Accepted"
@@ -21,6 +23,7 @@ class Decision(SQLModel, table=True):
     consequences_bad: str
     commit_hash: Optional[str] = None
 
+
 def get_engine(db_path: str = "edl.db") -> Engine:
     """
     Creates and returns a SQLModel engine for the database.
@@ -33,6 +36,7 @@ def get_engine(db_path: str = "edl.db") -> Engine:
     """
     sqlite_url = f"sqlite:///{db_path}"
     return create_engine(sqlite_url)
+
 
 def init_db(db_path: str = "edl.db") -> None:
     """

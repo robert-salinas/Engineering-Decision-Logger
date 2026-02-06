@@ -3,11 +3,13 @@ import git
 from pathlib import Path
 import os
 
+
 class GitManager:
     """
     Handles interactions with the Git repository, such as retrieving commit hashes
     and installing hooks.
     """
+
     def __init__(self, repo_path: str = "."):
         """
         Initializes the GitManager.
@@ -54,16 +56,16 @@ class GitManager:
 echo "Checking for new Engineering Decisions..."
 # You can add logic here to enforce ADR creation if needed
 """
-        
+
         with open(hook_path, "w") as f:
             f.write(hook_content)
-        
+
         # Make it executable
         try:
             os.chmod(hook_path, 0o755)
         except OSError:
             pass
-            
+
         return True, f"Hook {hook_name} installed at {hook_path}"
 
     def get_last_commit_msg(self) -> str:

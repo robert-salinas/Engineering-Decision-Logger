@@ -11,18 +11,23 @@ console = Console()
 manager = DecisionManager()
 git_manager = GitManager()
 
+
 @app.command()
 def log(
     title: str = typer.Option(..., prompt="Title of the decision"),
     context: str = typer.Option(..., prompt="Context and problem statement"),
     chosen_option: str = typer.Option(..., prompt="Chosen option"),
     rationale: str = typer.Option(..., prompt="Rationale for the decision"),
-    status: str = typer.Option("Proposed", prompt="Status (Proposed/Accepted/Deprecated/Superseded)"),
+    status: str = typer.Option(
+        "Proposed", prompt="Status (Proposed/Accepted/Deprecated/Superseded)"
+    ),
     drivers: str = typer.Option("", help="Comma separated decision drivers"),
     options: str = typer.Option("", help="Comma separated considered options"),
     good: str = typer.Option("", help="Good consequences"),
     bad: str = typer.Option("", help="Bad consequences"),
-    no_git: bool = typer.Option(False, "--no-git", help="Do not associate with git commit"),
+    no_git: bool = typer.Option(
+        False, "--no-git", help="Do not associate with git commit"
+    ),
 ) -> None:
     """
     Logs a new engineering decision.
@@ -41,14 +46,15 @@ def log(
         "options": [o.strip() for o in options.split(",")] if options else [],
         "consequences_good": good,
         "consequences_bad": bad,
-        "commit_hash": commit_hash
+        "commit_hash": commit_hash,
     }
-    
+
     decision = manager.add_decision(data)
     console.print(f"[green]Decision logged successfully with ID: {decision.id}[/green]")
     if commit_hash:
         console.print(f"Associated with commit: [blue]{commit_hash[:7]}[/blue]")
     console.print(f"ADR file created in docs/ADR/")
+
 
 @app.command()
 def install_hooks() -> None:
@@ -60,6 +66,7 @@ def install_hooks() -> None:
         console.print(f"[green]{message}[/green]")
     else:
         console.print(f"[red]{message}[/red]")
+
 
 @app.command()
 def list_decisions() -> None:
@@ -82,6 +89,7 @@ def list_decisions() -> None:
 
     console.print(table)
 
+
 @app.command()
 def search(query: str) -> None:
     """
@@ -102,6 +110,7 @@ def search(query: str) -> None:
 
     console.print(table)
 
+
 @app.command()
 def show(decision_id: int) -> None:
     """
@@ -118,9 +127,12 @@ def show(decision_id: int) -> None:
     console.print(f"\n[bold]Context:[/bold]\n{decision.context}")
     console.print(f"\n[bold]Chosen Option:[/bold] {decision.chosen_option}")
     console.print(f"\n[bold]Rationale:[/bold]\n{decision.rationale}")
-    
+
     if decision.commit_hash:
-        console.print(f"\n[bold]Commit Hash:[/bold] [blue]{decision.commit_hash}[/blue]")
+        console.print(
+            f"\n[bold]Commit Hash:[/bold] [blue]{decision.commit_hash}[/blue]"
+        )
+
 
 if __name__ == "__main__":
     app()

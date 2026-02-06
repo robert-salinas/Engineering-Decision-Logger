@@ -16,3 +16,4 @@ src/git_integration/git_manager.py
 src/logger/__init__.py
 src/logger/manager.py
 src/logger/models.py
+tests/test_manager.py

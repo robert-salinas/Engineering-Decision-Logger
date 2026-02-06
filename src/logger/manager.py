@@ -1,3 +1,4 @@
+from typing import List, Dict, Any, Optional
 from sqlmodel import Session, select
 from .models import Decision, get_engine, init_db
 from ..adr_formatter.formatter import ADRFormatter
@@ -5,7 +6,18 @@ import os
 from pathlib import Path
 
 class DecisionManager:
+    """
+    Manages the lifecycle of engineering decisions, including database storage
+    and ADR file generation.
+    """
     def __init__(self, db_path: str = "edl.db", adr_dir: str = "docs/ADR"):
+        """
+        Initializes the DecisionManager.
+
+        Args:
+            db_path (str): Path to the SQLite database.
+            adr_dir (str): Directory where ADR Markdown files will be saved.
+        """
         self.db_path = db_path
         self.adr_dir = Path(adr_dir)
         self.engine = get_engine(db_path)
@@ -16,7 +28,16 @@ class DecisionManager:
         # Initialize DB
         init_db(db_path)
 
-    def add_decision(self, data: dict) -> Decision:
+    def add_decision(self, data: Dict[str, Any]) -> Decision:
+        """
+        Adds a new decision to the database and generates its ADR file.
+
+        Args:
+            data (Dict[str, Any]): Dictionary containing decision details.
+
+        Returns:
+            Decision: The created Decision object.
+        """
         with Session(self.engine) as session:
             # Get next ID
             statement = select(Decision).order_by(Decision.id.desc())
@@ -46,7 +67,14 @@ class DecisionManager:
             
             return decision
 
-    def _save_adr_file(self, decision: Decision, original_data: dict):
+    def _save_adr_file(self, decision: Decision, original_data: Dict[str, Any]) -> None:
+        """
+        Generates and saves the ADR Markdown file for a decision.
+
+        Args:
+            decision (Decision): The decision object.
+            original_data (Dict[str, Any]): The original input data.
+        """
         # Prepare data for formatter (need lists instead of comma separated strings)
         render_data = original_data.copy()
         render_data["id"] = decision.id
@@ -63,15 +91,39 @@ class DecisionManager:
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)
 
-    def list_decisions(self) -> list[Decision]:
+    def list_decisions(self) -> List[Decision]:
+        """
+        Retrieves all decisions from the database.
+
+        Returns:
+            List[Decision]: A list of all Decision objects.
+        """
         with Session(self.engine) as session:
             return session.exec(select(Decision)).all()
 
-    def get_decision(self, decision_id: int) -> Decision:
+    def get_decision(self, decision_id: int) -> Optional[Decision]:
+        """
+        Retrieves a specific decision by its ID.
+
+        Args:
+            decision_id (int): The unique ID of the decision.
+
+        Returns:
+            Optional[Decision]: The Decision object if found, else None.
+        """
         with Session(self.engine) as session:
             return session.get(Decision, decision_id)
 
-    def search_decisions(self, query: str) -> list[Decision]:
+    def search_decisions(self, query: str) -> List[Decision]:
+        """
+        Searches for decisions matching a query string.
+
+        Args:
+            query (str): The search query.
+
+        Returns:
+            List[Decision]: A list of matching Decision objects.
+        """
         with Session(self.engine) as session:
             statement = select(Decision).where(
                 (Decision.title.contains(query)) | 

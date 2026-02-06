@@ -23,8 +23,10 @@ def log(
     good: str = typer.Option("", help="Good consequences"),
     bad: str = typer.Option("", help="Bad consequences"),
     no_git: bool = typer.Option(False, "--no-git", help="Do not associate with git commit"),
-):
-    """Log a new engineering decision."""
+) -> None:
+    """
+    Logs a new engineering decision.
+    """
     commit_hash = None
     if not no_git:
         commit_hash = git_manager.get_current_commit()
@@ -49,8 +51,10 @@ def log(
     console.print(f"ADR file created in docs/ADR/")
 
 @app.command()
-def install_hooks():
-    """Install Git hooks to help manage decisions."""
+def install_hooks() -> None:
+    """
+    Installs Git hooks to help manage decisions.
+    """
     success, message = git_manager.install_hook("pre-commit")
     if success:
         console.print(f"[green]{message}[/green]")
@@ -58,8 +62,10 @@ def install_hooks():
         console.print(f"[red]{message}[/red]")
 
 @app.command()
-def list():
-    """List all engineering decisions."""
+def list_decisions() -> None:
+    """
+    Lists all engineering decisions.
+    """
     decisions = manager.list_decisions()
     if not decisions:
         console.print("[yellow]No decisions found.[/yellow]")
@@ -77,8 +83,10 @@ def list():
     console.print(table)
 
 @app.command()
-def search(query: str):
-    """Search decisions by title, context, or rationale."""
+def search(query: str) -> None:
+    """
+    Searches decisions by title, context, or rationale.
+    """
     decisions = manager.search_decisions(query)
     if not decisions:
         console.print(f"[yellow]No decisions found matching '{query}'.[/yellow]")
@@ -95,28 +103,24 @@ def search(query: str):
     console.print(table)
 
 @app.command()
-def show(decision_id: int):
-    """Show detailed information for a decision."""
+def show(decision_id: int) -> None:
+    """
+    Shows detailed information for a specific decision.
+    """
     decision = manager.get_decision(decision_id)
     if not decision:
         console.print(f"[red]Decision with ID {decision_id} not found.[/red]")
         return
 
-    console.print(f"[bold magenta]Decision #{decision.id}: {decision.title}[/bold magenta]")
-    console.print(f"[cyan]Status:[/cyan] {decision.status}")
-    console.print(f"[cyan]Date:[/cyan] {decision.date}")
-    console.print(f"[cyan]Commit:[/cyan] {decision.commit_hash or 'N/A'}")
-    console.print("\n[bold]Context:[/bold]")
-    console.print(decision.context)
-    console.print("\n[bold]Decision Drivers:[/bold]")
-    console.print(decision.drivers)
-    console.print("\n[bold]Chosen Option:[/bold]")
-    console.print(f"[green]{decision.chosen_option}[/green]")
-    console.print("\n[bold]Rationale:[/bold]")
-    console.print(decision.rationale)
-    console.print("\n[bold]Consequences:[/bold]")
-    console.print(f"[green]Good:[/green] {decision.consequences_good}")
-    console.print(f"[red]Bad:[/red] {decision.consequences_bad}")
+    console.print(f"[bold cyan]Decision #{decision.id}: {decision.title}[/bold cyan]")
+    console.print(f"[bold]Status:[/bold] {decision.status}")
+    console.print(f"[bold]Date:[/bold] {decision.date}")
+    console.print(f"\n[bold]Context:[/bold]\n{decision.context}")
+    console.print(f"\n[bold]Chosen Option:[/bold] {decision.chosen_option}")
+    console.print(f"\n[bold]Rationale:[/bold]\n{decision.rationale}")
+    
+    if decision.commit_hash:
+        console.print(f"\n[bold]Commit Hash:[/bold] [blue]{decision.commit_hash}[/blue]")
 
 if __name__ == "__main__":
     app()

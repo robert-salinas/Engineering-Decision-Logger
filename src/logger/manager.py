@@ -51,6 +51,7 @@ class DecisionManager:
                 id=next_id,
                 title=data["title"],
                 status=data.get("status", "Proposed"),
+                impact=data.get("impact", "Medium"),
                 context=data["context"],
                 drivers=",".join(data.get("drivers", [])),
                 options=",".join(data.get("options", [])),

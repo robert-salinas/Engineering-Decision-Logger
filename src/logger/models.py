@@ -12,7 +12,8 @@ class Decision(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     title: str
-    status: str = "Accepted"
+    status: str = "Proposed"  # Proposed, Accepted, Deprecated, Superseded
+    impact: str = "Medium"  # Low, Medium, Critical
     date: str = Field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d"))
     context: str
     drivers: str  # Comma separated or JSON string

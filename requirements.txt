@@ -1,0 +1,10 @@
+customtkinter
+packaging
+pillow
+sqlmodel
+rich
+gitpython
+jinja2
+python-slugify
+fastapi
+uvicorn

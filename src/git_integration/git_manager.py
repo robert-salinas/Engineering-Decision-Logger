@@ -2,6 +2,7 @@ from typing import Tuple, Optional
 import git
 from pathlib import Path
 import os
+import sys
 
 
 class GitManager:
@@ -39,7 +40,7 @@ class GitManager:
 
     def install_hook(self, hook_name: str = "pre-commit") -> Tuple[bool, str]:
         """
-        Installs a Git hook in the current repository.
+        Installs a functional Git hook that checks for unresolved 'Proposed' decisions.
 
         Args:
             hook_name (str): The name of the hook (e.g., "pre-commit").
@@ -51,13 +52,54 @@ class GitManager:
             return False, "Not a git repository"
 
         hook_path = Path(self.repo.git_dir) / "hooks" / hook_name
+
+        # PU-8: Functional hook that checks for Proposed decisions in the DB
+        # Determine the path to the project root from the git dir
+        project_root = Path(self.repo.working_dir).as_posix()
+
         hook_content = f"""#!/bin/sh
-# EDL Git Hook
-echo "Checking for new Engineering Decisions..."
-# You can add logic here to enforce ADR creation if needed
+# EDL Pre-Commit Hook — RS Engineering Decision Logger
+# This hook checks for unresolved 'Proposed' decisions before allowing a commit.
+
+echo "🔍 EDL: Checking for unresolved Engineering Decisions..."
+
+# Use Python to query the database
+RESULT=$(python3 -c "
+import sys
+sys.path.insert(0, '{project_root}')
+try:
+    from src.logger.manager import DecisionManager
+    manager = DecisionManager()
+    stats = manager.get_stats()
+    proposed = stats['by_status'].get('Proposed', 0)
+    if proposed > 0:
+        print(f'WARNING: {{proposed}} decision(s) still in Proposed status.')
+        sys.exit(1)
+    else:
+        print('OK: All decisions are resolved.')
+        sys.exit(0)
+except Exception as e:
+    print(f'EDL hook error: {{e}}')
+    sys.exit(0)
+" 2>&1)
+
+EXIT_CODE=$?
+
+echo "$RESULT"
+
+if [ $EXIT_CODE -ne 0 ]; then
+    echo ""
+    echo "⚠️  EDL: You have unresolved decisions. Consider updating their status before committing."
+    echo "    Use 'edl list-decisions' to review them."
+    echo "    To skip this check, use: git commit --no-verify"
+    exit 1
+fi
+
+echo "✅ EDL: All decisions resolved. Proceeding with commit."
+exit 0
 """
 
-        with open(hook_path, "w") as f:
+        with open(hook_path, "w", encoding="utf-8") as f:
             f.write(hook_content)
 
         # Make it executable

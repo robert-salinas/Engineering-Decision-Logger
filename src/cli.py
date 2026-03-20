@@ -134,5 +134,17 @@ def show(decision_id: int) -> None:
         )
 
 
+@app.command()
+def generate_wiki() -> None:
+    """
+    Generates MkDocs configuration and index for static site docs.
+    """
+    try:
+        result = manager.generate_mkdocs_config()
+        console.print(f"[green]{result}[/green]")
+    except Exception as e:
+        console.print(f"[red]Error generating wiki: {e}[/red]")
+
+
 if __name__ == "__main__":
     app()

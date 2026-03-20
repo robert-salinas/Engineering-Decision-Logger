@@ -21,6 +21,16 @@ En proyectos complejos, las decisiones técnicas a menudo se pierden. **EDL** re
 
 ---
 
+### 🚀 Novedades v0.2.0 (Pro Upgrades)
+
+*   📊 **Panel de Control:** Dashboard visual con métricas de impacto y estados (Gráficos integrados en GUI y Web).
+*   ✏️ **Gestión Completa (CRUD):** Ahora puedes editar y eliminar decisiones obsoletas rápidamente.
+*   📄 **Exportación HTML:** Genera reportes independientes listos para compartir con un solo clic.
+*   🔔 **Toasts & Validaciones:** Notificaciones reactivas y validación de campos para optimizar la carga de datos.
+*   🛡️ **Git Pre-commit Hook:** El sistema ahora previene commits si existen decisiones en estado `Proposed` sin resolver asistidos.
+
+---
+
 ### 🛠️ Stack Tecnológico
 
 *   **GUI Framework:** [CustomTkinter](https://github.com/TomSchimansky/CustomTkinter) (RS Digital Aesthetic)

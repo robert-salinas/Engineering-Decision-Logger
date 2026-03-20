@@ -5,18 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RS Engineering Decision Logger</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'rs-light': '#F8FAFC',
-                        'rs-sidebar': '#FFFFFF',
-                        'rs-accent': '#2563EB',
-                        'rs-card': '#FFFFFF',
-                        'rs-text': '#1E293B',
-                        'rs-text-muted': '#64748B',
+                        'rs-dark': '#1A1F2E',
+                        'rs-sidebar': '#131722',
+                        'rs-accent': '#FF7A3D',
+                        'rs-card': '#242B3D',
+                        'rs-text': '#E2E8F0',
+                        'rs-text-muted': '#8892A4',
+                        'rs-success': '#4CAF50',
+                        'rs-error': '#FF4B4B',
+                        'rs-blue': '#3D9CFF',
                     }
                 }
             }
@@ -27,67 +31,74 @@
             width: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #F1F5F9;
+            background: #131722;
         }
         ::-webkit-scrollbar-thumb {
-            background: #2563EB;
+            background: #FF7A3D;
             border-radius: 10px;
         }
         .rs-shadow {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
         .rs-border {
-            border: 1px solid #E2E8F0;
+            border: 1px solid #333;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out;
         }
     </style>
 </head>
-<body class="bg-rs-light text-rs-text font-sans h-screen flex overflow-hidden">
+<body class="bg-rs-dark text-rs-text font-sans h-screen flex overflow-hidden">
 
     <!-- Sidebar -->
-    <aside class="w-72 bg-rs-sidebar flex flex-col border-r border-gray-200">
-        <div class="p-6 border-b border-gray-100 flex items-center gap-3">
+    <aside class="w-72 bg-rs-sidebar flex flex-col border-r border-gray-800">
+        <div class="p-6 border-b border-gray-800 flex items-center gap-3">
             <div class="w-10 h-10 bg-rs-accent rounded-lg flex items-center justify-center text-white">
                 <i class="fas fa-book-bookmark text-xl"></i>
             </div>
-            <h1 class="text-xl font-bold tracking-tight">RS <span class="text-rs-accent">EDL</span></h1>
+            <h1 class="text-xl font-bold tracking-tight text-rs-text">RS <span class="text-rs-accent">EDL</span></h1>
         </div>
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-2">
-            <button onclick="toggleModal('modal-new')" class="w-full flex items-center gap-3 px-4 py-3 bg-rs-accent text-white font-bold rounded-xl hover:bg-blue-700 transition-all mb-6 rs-shadow">
+            <button onclick="toggleModal('modal-new')" class="w-full flex items-center gap-3 px-4 py-3 bg-rs-accent text-rs-sidebar font-bold rounded-xl hover:brightness-110 transition-all mb-6 rs-shadow">
                 <i class="fas fa-plus"></i> Nueva Decisión
             </button>
 
             <div class="text-xs font-bold text-rs-text-muted uppercase tracking-widest px-4 mb-2">Historial</div>
             {% for decision in decisions %}
-            <a href="/decision/{{ decision.id }}" class="block p-4 rounded-xl hover:bg-blue-50 transition-all {% if selected_decision and selected_decision.id == decision.id %}bg-blue-50 border-l-4 border-rs-accent{% else %}bg-rs-sidebar rs-border{% endif %} mb-3 rs-shadow">
+            <a href="/decision/{{ decision.id }}" class="block p-4 rounded-xl transition-all {% if selected_decision and selected_decision.id == decision.id %}bg-rs-card border-l-4 border-rs-accent{% else %}bg-rs-sidebar rs-border hover:bg-rs-card{% endif %} mb-3 rs-shadow">
                 <div class="flex justify-between items-start mb-1">
                     <span class="text-xs font-mono text-rs-accent">{{ decision.date }}</span>
                     <span class="text-[10px] px-2 py-0.5 rounded-full uppercase font-bold 
-                        {% if decision.impact == 'Critical' %}bg-red-100 text-red-700
-                        {% elif decision.impact == 'Medium' %}bg-orange-100 text-orange-700
-                        {% else %}bg-blue-100 text-blue-700{% endif %}">
+                        {% if decision.impact == 'Critical' %}bg-red-900/50 text-rs-error
+                        {% elif decision.impact == 'Medium' %}bg-orange-900/50 text-rs-accent
+                        {% else %}bg-blue-900/50 text-rs-blue{% endif %}">
                         {{ decision.impact }}
                     </span>
                 </div>
-                <h3 class="font-bold text-sm truncate">{{ decision.title }}</h3>
+                <h3 class="font-bold text-sm truncate text-rs-text">{{ decision.title }}</h3>
             </a>
             {% endfor %}
         </nav>
 
-        <div class="p-4 border-t border-gray-100 text-center">
-            <span class="text-xs text-rs-text-muted">Robert Salinas &copy; 2026</span>
+        <div class="p-4 border-t border-gray-800 text-center">
+            <span class="text-xs text-rs-text-muted">Robert Salinas &copy; {{ current_year }}</span>
         </div>
     </aside>
 
     <!-- Main Content -->
     <main class="flex-1 flex flex-col overflow-hidden">
         <!-- Header / Search -->
-        <header class="h-16 border-b border-gray-200 flex items-center justify-between px-8 bg-white bg-opacity-80 backdrop-blur">
+        <header class="h-16 border-b border-gray-800 flex items-center justify-between px-8 bg-rs-sidebar bg-opacity-80 backdrop-blur">
             <div class="relative w-96">
                 <form action="/" method="get">
                     <input type="text" name="q" placeholder="Buscar decisiones..." value="{{ search_query or '' }}" 
-                        class="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-10 text-sm focus:outline-none focus:border-rs-accent transition-all">
-                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        class="w-full bg-rs-card border border-gray-700 rounded-lg py-2 px-10 text-sm text-rs-text focus:outline-none focus:border-rs-accent transition-all placeholder-rs-text-muted">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-rs-text-muted"></i>
                 </form>
             </div>
             <div class="flex items-center gap-4">
@@ -98,60 +109,110 @@
         <!-- Content Area -->
         <div class="flex-1 overflow-y-auto p-8">
             {% if selected_decision %}
-                <div class="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                <div class="max-w-4xl mx-auto space-y-8 animate-fade-in">
                     <div class="flex items-center justify-between">
                         <div>
                             <span class="text-rs-accent font-mono text-sm">{{ selected_decision.date }}</span>
                             <h2 class="text-4xl font-bold mt-2 text-rs-text">{{ selected_decision.title }}</h2>
                         </div>
-                        <div class="text-right">
-                            <span class="block text-xs text-rs-text-muted mb-1 uppercase tracking-widest">Impacto</span>
-                            <span class="px-4 py-1.5 rounded-lg text-sm font-bold uppercase
-                                {% if selected_decision.impact == 'Critical' %}bg-red-100 text-red-700
-                                {% elif selected_decision.impact == 'Medium' %}bg-orange-100 text-orange-700
-                                {% else %}bg-blue-100 text-blue-700{% endif %}">
-                                {{ selected_decision.impact }}
-                            </span>
+                        <div class="text-right flex flex-col gap-2">
+                            <div>
+                                <span class="block text-xs text-rs-text-muted mb-1 uppercase tracking-widest">Impacto</span>
+                                <span class="px-4 py-1.5 rounded-lg text-sm font-bold uppercase
+                                    {% if selected_decision.impact == 'Critical' %}bg-red-900/50 text-rs-error
+                                    {% elif selected_decision.impact == 'Medium' %}bg-orange-900/50 text-rs-accent
+                                    {% else %}bg-blue-900/50 text-rs-blue{% endif %}">
+                                    {{ selected_decision.impact }}
+                                </span>
+                            </div>
+                            <div>
+                                <span class="px-4 py-1.5 rounded-lg text-xs font-bold uppercase
+                                    {% if selected_decision.status == 'Accepted' %}bg-green-900/50 text-rs-success
+                                    {% elif selected_decision.status == 'Proposed' %}bg-purple-900/50 text-purple-400
+                                    {% elif selected_decision.status == 'Deprecated' %}bg-gray-800 text-gray-400
+                                    {% else %}bg-orange-900/50 text-orange-400{% endif %}">
+                                    {{ selected_decision.status }}
+                                </span>
+                            </div>
+                            {% if selected_decision.depends_on %}
+                            <div class="mt-1">
+                                <span class="text-xs text-rs-text-muted">🔗 Depende de:</span>
+                                <span class="text-xs font-mono text-rs-blue font-bold">{{ selected_decision.depends_on }}</span>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white p-6 rounded-2xl rs-shadow rs-border">
+                        <div class="bg-rs-card p-6 rounded-2xl rs-shadow rs-border">
                             <h3 class="text-rs-accent font-bold flex items-center gap-2 mb-4">
                                 <i class="fas fa-triangle-exclamation"></i> Contexto y Problema
                             </h3>
                             <p class="text-rs-text-muted leading-relaxed whitespace-pre-wrap">{{ selected_decision.context }}</p>
                         </div>
-                        <div class="bg-white p-6 rounded-2xl rs-shadow rs-border">
-                            <h3 class="text-green-600 font-bold flex items-center gap-2 mb-4">
+                        <div class="bg-rs-card p-6 rounded-2xl rs-shadow rs-border">
+                            <h3 class="text-rs-success font-bold flex items-center gap-2 mb-4">
                                 <i class="fas fa-check-circle"></i> Solución Aplicada
                             </h3>
                             <p class="text-rs-text-muted leading-relaxed whitespace-pre-wrap">{{ selected_decision.chosen_option }}</p>
                         </div>
                     </div>
 
-                    <div class="bg-white p-8 rounded-2xl rs-shadow rs-border">
+                    <div class="bg-rs-card p-8 rounded-2xl rs-shadow rs-border">
                         <h3 class="text-rs-accent font-bold flex items-center gap-2 mb-4">
                             <i class="fas fa-microchip"></i> Justificación Técnica
                         </h3>
-                        <div class="prose prose-slate max-w-none text-rs-text-muted whitespace-pre-wrap">{{ selected_decision.rationale }}</div>
+                        <div class="text-rs-text-muted whitespace-pre-wrap leading-relaxed">{{ selected_decision.rationale }}</div>
                     </div>
                 </div>
             {% else %}
-                <div class="h-full flex flex-col items-center justify-center text-gray-300">
-                    <i class="fas fa-folder-open text-8xl mb-4"></i>
-                    <p class="text-xl font-medium">Selecciona una decisión para ver los detalles</p>
+                <!-- Dashboard View (UI-2) -->
+                <div class="max-w-4xl mx-auto space-y-8 animate-fade-in p-4">
+                    <div class="text-center py-6">
+                        <h1 class="text-4xl font-bold text-rs-accent tracking-tight">RS ENGINEERING</h1>
+                        <p class="text-rs-text-muted mt-2">Métricas de Decisiones Técnicas</p>
+                    </div>
+
+                    <!-- Impact counts widgets -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-rs-card p-6 rounded-2xl rs-border text-center rs-shadow border border-gray-800">
+                            <div class="text-3xl font-bold text-rs-accent">{{ stats.total }}</div>
+                            <div class="text-xs text-rs-text-muted mt-1 uppercase tracking-wider">Total</div>
+                        </div>
+                        <div class="bg-rs-card p-6 rounded-2xl rs-border text-center rs-shadow border border-gray-800">
+                            <div class="text-3xl font-bold text-rs-error">{{ stats.by_impact.Critical or 0 }}</div>
+                            <div class="text-xs text-rs-text-muted mt-1 uppercase tracking-wider">Críticas</div>
+                        </div>
+                        <div class="bg-rs-card p-6 rounded-2xl rs-border text-center rs-shadow border border-gray-800">
+                            <div class="text-3xl font-bold text-rs-accent">{{ stats.by_impact.Medium or 0 }}</div>
+                            <div class="text-xs text-rs-text-muted mt-1 uppercase tracking-wider">Medias</div>
+                        </div>
+                        <div class="bg-rs-card p-6 rounded-2xl rs-border text-center rs-shadow border border-gray-800">
+                            <div class="text-3xl font-bold text-rs-blue">{{ stats.by_impact.Low or 0 }}</div>
+                            <div class="text-xs text-rs-text-muted mt-1 uppercase tracking-wider">Bajas</div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Chart Canvas Overlay -->
+                    <div class="bg-rs-card p-6 rounded-2xl rs-border rs-shadow max-w-xl mx-auto border border-gray-800">
+                        <h3 class="text-rs-accent font-bold mb-4 flex items-center gap-2">
+                             <i class="fas fa-chart-pie"></i> Distribución de Status
+                        </h3>
+                        <div class="relative aspect-square">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
                 </div>
             {% endif %}
         </div>
     </main>
 
     <!-- Modal New Decision -->
-    <div id="modal-new" class="fixed inset-0 bg-slate-900 bg-opacity-50 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white w-full max-w-2xl rounded-2xl rs-shadow rs-border flex flex-col max-h-[90vh]">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+    <div id="modal-new" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-rs-card w-full max-w-2xl rounded-2xl rs-shadow rs-border flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b border-gray-700 flex justify-between items-center">
                 <h2 class="text-xl font-bold text-rs-text"><i class="fas fa-plus text-rs-accent mr-2"></i>Nueva Decisión Técnica</h2>
-                <button onclick="toggleModal('modal-new')" class="text-gray-400 hover:text-rs-text transition-colors">
+                <button onclick="toggleModal('modal-new')" class="text-rs-text-muted hover:text-rs-text transition-colors">
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
@@ -161,14 +222,23 @@
                     <div class="col-span-2">
                         <label class="block text-xs font-bold text-rs-text-muted uppercase mb-1">Título de la Decisión</label>
                         <input type="text" name="title" required placeholder="Ej: Migración a FastAPI..." 
-                            class="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-rs-accent">
+                            class="w-full bg-rs-dark border border-gray-700 rounded-lg py-2 px-4 text-sm text-rs-text focus:outline-none focus:border-rs-accent transition-all placeholder-rs-text-muted">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-rs-text-muted uppercase mb-1">Impacto</label>
-                        <select name="impact" class="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-rs-accent">
+                        <select name="impact" class="w-full bg-rs-dark border border-gray-700 rounded-lg py-2 px-4 text-sm text-rs-text focus:outline-none focus:border-rs-accent">
                             <option value="Low">Bajo</option>
                             <option value="Medium" selected>Medio</option>
                             <option value="Critical">Crítico</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-rs-text-muted uppercase mb-1">Estado</label>
+                        <select name="status" class="w-full bg-rs-dark border border-gray-700 rounded-lg py-2 px-4 text-sm text-rs-text focus:outline-none focus:border-rs-accent">
+                            <option value="Proposed">Propuesta</option>
+                            <option value="Accepted" selected>Aceptada</option>
+                            <option value="Deprecated">Deprecada</option>
+                            <option value="Superseded">Sustituida</option>
                         </select>
                     </div>
                 </div>
@@ -176,23 +246,23 @@
                 <div>
                     <label class="block text-xs font-bold text-rs-text-muted uppercase mb-1">Contexto y Problema</label>
                     <textarea name="context" rows="3" required placeholder="Describe el desafío técnico..." 
-                        class="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-rs-accent resize-none"></textarea>
+                        class="w-full bg-rs-dark border border-gray-700 rounded-lg py-2 px-4 text-sm text-rs-text focus:outline-none focus:border-rs-accent resize-none placeholder-rs-text-muted"></textarea>
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-rs-text-muted uppercase mb-1">Solución Aplicada</label>
                     <textarea name="chosen_option" rows="2" required placeholder="¿Qué se implementó?" 
-                        class="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-rs-accent resize-none"></textarea>
+                        class="w-full bg-rs-dark border border-gray-700 rounded-lg py-2 px-4 text-sm text-rs-text focus:outline-none focus:border-rs-accent resize-none placeholder-rs-text-muted"></textarea>
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-rs-text-muted uppercase mb-1">Justificación Técnica</label>
                     <textarea name="rationale" rows="4" required placeholder="Explica el 'por qué' técnico..." 
-                        class="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-rs-accent resize-none"></textarea>
+                        class="w-full bg-rs-dark border border-gray-700 rounded-lg py-2 px-4 text-sm text-rs-text focus:outline-none focus:border-rs-accent resize-none placeholder-rs-text-muted"></textarea>
                 </div>
 
                 <div class="pt-4">
-                    <button type="submit" class="w-full py-3 bg-rs-accent text-white font-bold rounded-xl hover:bg-blue-700 transition-all rs-shadow">
+                    <button type="submit" class="w-full py-3 bg-rs-accent text-rs-sidebar font-bold rounded-xl hover:brightness-110 transition-all rs-shadow">
                         Registrar Decisión
                     </button>
                 </div>
@@ -205,6 +275,38 @@
             const modal = document.getElementById(id);
             modal.classList.toggle('hidden');
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const ctx = document.getElementById('statusChart');
+            if (!ctx) return;
+            
+            const stats = {
+                 Proposed: {{ stats.by_status.Proposed or 0 }},
+                 Accepted: {{ stats.by_status.Accepted or 0 }},
+                 Deprecated: {{ stats.by_status.Deprecated or 0 }},
+                 Superseded: {{ stats.by_status.Superseded or 0 }}
+            };
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Propuestas', 'Aceptadas', 'Deprecadas', 'Sustituidas'],
+                    datasets: [{
+                        data: [stats.Proposed, stats.Accepted, stats.Deprecated, stats.Superseded],
+                        backgroundColor: ['#9B59B6', '#4CAF50', '#95A5A6', '#E67E22'],
+                        borderColor: '#1A1F2E',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#E2E8F0', padding: 10 } }
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>

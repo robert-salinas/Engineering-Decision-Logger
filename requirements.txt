@@ -1,6 +1,4 @@
 customtkinter
-packaging
-pillow
 sqlmodel
 rich
 gitpython
